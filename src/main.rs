@@ -3,16 +3,25 @@
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*,
-    window::{PresentMode, WindowTheme},
+    window::{PresentMode, WindowResized, WindowTheme},
 };
+
+const WIDESCREEN: Vec2 = Vec2::new(1920.0, 1080.0);
+const VERTICAL: Vec2 = Vec2::new(1080.0, 1920.0);
+const SQUARE: Vec2 = Vec2::new(640.0, 640.0);
 
 fn main() {
     App::new()
+        .insert_resource(ResolutionSettings {
+            widescreen: WIDESCREEN,
+            vertical: VERTICAL,
+            square: SQUARE,
+        })
         .add_plugins((
             DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
-                    title: "I am a window!".into(),
-                    resolution: (1250.0, 1000.0).into(),
+                    // title: "I am a window!".into(),
+                    resolution: VERTICAL.into(),
                     present_mode: PresentMode::AutoVsync,
                     // Tells wasm to resize the window according to the available canvas
                     fit_canvas_to_parent: true,
@@ -27,8 +36,47 @@ fn main() {
             // LogDiagnosticsPlugin::default(),
             // FrameTimeDiagnosticsPlugin,
         ))
-        .add_systems(Startup, (setup, setup_light, setup_camera))
+        .add_systems(Startup, (setup, setup_light, setup_camera, setup_ui))
+        .add_systems(Update, (on_resize_system, toggle_resolution))
         .run();
+}
+
+/// Marker component for the text that displays the current resolution.
+#[derive(Component)]
+struct ResolutionText;
+
+/// Stores the various window-resolutions we can select between.
+#[derive(Resource)]
+struct ResolutionSettings {
+    widescreen: Vec2, // 16:9
+    vertical: Vec2,   // 9:16
+    square: Vec2,     // 1:1
+}
+
+// Spawns the UI
+fn setup_ui(mut cmd: Commands) {
+    // Node that fills entire background
+    cmd.spawn(NodeBundle {
+        style: Style {
+            width: Val::Percent(100.),
+            ..default()
+        },
+        ..default()
+    })
+    .with_children(|root| {
+        // Text where we display current resolution
+        root.spawn((
+            TextBundle::from_section(
+                "Resolution",
+                TextStyle {
+                    font_size: 50.0,
+                    color: Color::BLACK,
+                    ..default()
+                },
+            ),
+            ResolutionText,
+        ));
+    });
 }
 
 /// set up a simple 3D scene
@@ -120,4 +168,39 @@ fn setup_camera(mut commands: Commands) {
         transform: Transform::from_xyz(0.0, 0.0, 6.75 * 5.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
+}
+
+/// This system shows how to request the window to a new resolution
+fn toggle_resolution(
+    keys: Res<Input<KeyCode>>,
+    mut windows: Query<&mut Window>,
+    resolution: Res<ResolutionSettings>,
+) {
+    let mut window = windows.single_mut();
+
+    if keys.just_pressed(KeyCode::Key1) {
+        let res = resolution.widescreen;
+        window.resolution.set(res.x, res.y);
+    }
+    if keys.just_pressed(KeyCode::Key2) {
+        let res = resolution.vertical;
+        window.resolution.set(res.x, res.y);
+    }
+    if keys.just_pressed(KeyCode::Key3) {
+        let res = resolution.square;
+        window.resolution.set(res.x, res.y);
+    }
+}
+
+/// This system shows how to respond to a window being resized.
+/// Whenever the window is resized, the text will update with the new resolution.
+fn on_resize_system(
+    mut q: Query<&mut Text, With<ResolutionText>>,
+    mut resize_reader: EventReader<WindowResized>,
+) {
+    let mut text = q.single_mut();
+    for e in resize_reader.iter() {
+        // When resolution is being changed
+        text.sections[0].value = format!("{:.1} x {:.1}", e.width, e.height);
+    }
 }
