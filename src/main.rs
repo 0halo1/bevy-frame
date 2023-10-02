@@ -12,7 +12,7 @@ fn main() {
             DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "I am a window!".into(),
-                    resolution: (3840., 2160.).into(),
+                    resolution: (1000.0, 1000.0).into(),
                     present_mode: PresentMode::AutoVsync,
                     // Tells wasm to resize the window according to the available canvas
                     fit_canvas_to_parent: true,
@@ -39,7 +39,7 @@ fn setup(
     mut windows: Query<&mut Window>,
 ) {
     let mut window = windows.single_mut();
-    window.resolution.set(750.0, 750.0);
+    window.resolution.set(1000.0, 1000.0);
 
     let cube_size = 0.125;
     let cube_color = Color::rgb(0.98, 0.98, 0.96);
