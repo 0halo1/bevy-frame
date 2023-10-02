@@ -3,7 +3,7 @@
 use bevy::{
     diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*,
-    window::{CursorGrabMode, PresentMode, WindowLevel, WindowTheme},
+    window::{PresentMode, WindowTheme},
 };
 
 fn main() {
@@ -16,6 +16,7 @@ fn main() {
                     present_mode: PresentMode::AutoVsync,
                     // Tells wasm to resize the window according to the available canvas
                     fit_canvas_to_parent: true,
+                    // mode: WindowMode::Fullscreen,
                     // Tells wasm not to override default event handling, like F5, Ctrl+R etc.
                     prevent_default_event_handling: false,
                     window_theme: Some(WindowTheme::Dark),
@@ -23,10 +24,10 @@ fn main() {
                 }),
                 ..default()
             }),
-            LogDiagnosticsPlugin::default(),
-            FrameTimeDiagnosticsPlugin,
+            // LogDiagnosticsPlugin::default(),
+            // FrameTimeDiagnosticsPlugin,
         ))
-        .add_systems(Startup, setup)
+        .add_systems(Startup, (setup, setup_light, setup_camera))
         .run();
 }
 
@@ -36,21 +37,54 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    // plane
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(shape::Plane::from_size(5.0).into()),
-        material: materials.add(Color::rgb(0.3, 0.5, 0.3).into()),
-        ..default()
-    });
+    let cube_size = 0.125;
+    let cube_color = Color::rgb(0.8, 0.7, 0.6);
+    let cube_material = materials.add(cube_color.into());
+    let cube_mesh = meshes.add(shape::Cube { size: cube_size }.into());
+    let plane_size = 5.0;
+    let cube_count = (plane_size / cube_size) as usize;
+    let cube_offset = plane_size / 2.0 - cube_size / 2.0;
 
-    // cube
-    commands.spawn(PbrBundle {
-        mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-        material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-        transform: Transform::from_xyz(0.0, 0.5, 0.0),
-        ..default()
-    });
+    println!("cube_size: {}", cube_size);
+    println!("cube_count: {}", cube_count);
 
+    for x in 0..cube_count {
+        for z in 0..cube_count {
+            commands.spawn(PbrBundle {
+                mesh: cube_mesh.clone(),
+                material: cube_material.clone(),
+                transform: Transform::from_xyz(
+                    x as f32 * cube_size - cube_offset,
+                    0.0,
+                    z as f32 * cube_size - cube_offset,
+                ),
+                ..Default::default()
+            });
+        }
+    }
+
+    // draw another layer of cubes on top of the first layer but only on the edges, iterate this 3 times
+    for y in 1..4 {
+        for x in 0..cube_count {
+            for z in 0..cube_count {
+                if x == 0 || x == cube_count - 1 || z == 0 || z == cube_count - 1 {
+                    commands.spawn(PbrBundle {
+                        mesh: cube_mesh.clone(),
+                        material: cube_material.clone(),
+                        transform: Transform::from_xyz(
+                            x as f32 * cube_size - cube_offset,
+                            y as f32 * cube_size,
+                            z as f32 * cube_size - cube_offset,
+                        ),
+                        ..Default::default()
+                    });
+                }
+            }
+        }
+    }
+}
+
+fn setup_light(mut commands: Commands) {
     // light
     commands.spawn(PointLightBundle {
         point_light: PointLight {
@@ -61,10 +95,12 @@ fn setup(
         transform: Transform::from_xyz(4.0, 8.0, 4.0),
         ..default()
     });
+}
 
+fn setup_camera(mut commands: Commands) {
     // camera
     commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_xyz(0.0, 1.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
 }
