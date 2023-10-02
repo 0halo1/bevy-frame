@@ -36,9 +36,13 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut windows: Query<&mut Window>,
 ) {
+    let mut window = windows.single_mut();
+    window.resolution.set(750.0, 750.0);
+
     let cube_size = 0.125;
-    let cube_color = Color::rgb(0.8, 0.7, 0.6);
+    let cube_color = Color::rgb(0.98, 0.98, 0.96);
     let cube_material = materials.add(cube_color.into());
     let cube_mesh = meshes.add(shape::Cube { size: cube_size }.into());
     let plane_size = 5.0;
@@ -55,8 +59,8 @@ fn setup(
                 material: cube_material.clone(),
                 transform: Transform::from_xyz(
                     x as f32 * cube_size - cube_offset,
-                    0.0,
                     z as f32 * cube_size - cube_offset,
+                    0.0,
                 ),
                 ..Default::default()
             });
@@ -64,7 +68,7 @@ fn setup(
     }
 
     // draw another layer of cubes on top of the first layer but only on the edges, iterate this 3 times
-    for y in 1..4 {
+    for y in 1..6 {
         for x in 0..cube_count {
             for z in 0..cube_count {
                 if x == 0 || x == cube_count - 1 || z == 0 || z == cube_count - 1 {
@@ -73,8 +77,8 @@ fn setup(
                         material: cube_material.clone(),
                         transform: Transform::from_xyz(
                             x as f32 * cube_size - cube_offset,
-                            y as f32 * cube_size,
                             z as f32 * cube_size - cube_offset,
+                            y as f32 * cube_size,
                         ),
                         ..Default::default()
                     });
@@ -92,7 +96,7 @@ fn setup_light(mut commands: Commands) {
             shadows_enabled: true,
             ..default()
         },
-        transform: Transform::from_xyz(4.0, 8.0, 4.0),
+        transform: Transform::from_xyz(0.0, 6.0, 4.0),
         ..default()
     });
 }
@@ -100,7 +104,7 @@ fn setup_light(mut commands: Commands) {
 fn setup_camera(mut commands: Commands) {
     // camera
     commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0.0, 1.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_xyz(0.0, 0.0, 6.75).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
 }
