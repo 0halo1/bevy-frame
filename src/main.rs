@@ -12,7 +12,7 @@ fn main() {
             DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
                     title: "I am a window!".into(),
-                    resolution: (1000.0, 1000.0).into(),
+                    resolution: (1250.0, 1000.0).into(),
                     present_mode: PresentMode::AutoVsync,
                     // Tells wasm to resize the window according to the available canvas
                     fit_canvas_to_parent: true,
@@ -38,8 +38,16 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut windows: Query<&mut Window>,
 ) {
-    let mut window = windows.single_mut();
-    window.resolution.set(1000.0, 1000.0);
+    let window = windows.single_mut();
+    let window_width = window.width();
+    let window_height = window.height();
+    println!("window_width: {}", window_width);
+    println!("window_height: {}", window_height);
+
+    let plane_size_x = window_width / 200.0;
+    let plane_size_y = window_height / 200.0;
+    println!("plane_size_x: {}", plane_size_x);
+    println!("plane_size_y: {}", plane_size_y);
 
     let cube_size = 0.125;
     println!("cube_size: {}", cube_size);
@@ -47,8 +55,6 @@ fn setup(
     let cube_color = Color::rgb(0.98, 0.98, 0.96);
     let cube_material = materials.add(cube_color.into());
     let cube_mesh = meshes.add(shape::Cube { size: cube_size }.into());
-    let plane_size_x = 5.0;
-    let plane_size_y = 10.0;
 
     let cube_count_x = (plane_size_x / cube_size) as usize;
     let cube_count_y = (plane_size_y / cube_size) as usize;
