@@ -1,14 +1,19 @@
-//! A simple 3D scene with light shining over a cube sitting on a plane.
-
 use bevy::{
-    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     prelude::*,
     window::{PresentMode, WindowResized, WindowTheme},
 };
 
+// The following constants are used to set the resolution of the window.
 const WIDESCREEN: Vec2 = Vec2::new(1920.0, 1080.0);
 const VERTICAL: Vec2 = Vec2::new(1080.0, 1920.0);
 const SQUARE: Vec2 = Vec2::new(640.0, 640.0);
+
+// The plane is 200x200 units
+const PLANE_X_MODIFIER: f32 = 200.0;
+const PLANE_Y_MODIFIER: f32 = 200.0;
+
+// Color of the cube
+const CUBE_COLOR: Color = Color::rgb(0.98, 0.98, 0.96);
 
 fn main() {
     App::new()
@@ -92,16 +97,15 @@ fn setup(
     println!("window_width: {}", window_width);
     println!("window_height: {}", window_height);
 
-    let plane_size_x = window_width / 200.0;
-    let plane_size_y = window_height / 200.0;
+    let plane_size_x = window_width / PLANE_X_MODIFIER;
+    let plane_size_y = window_height / PLANE_Y_MODIFIER;
     println!("plane_size_x: {}", plane_size_x);
     println!("plane_size_y: {}", plane_size_y);
 
     let cube_size = 0.125;
     println!("cube_size: {}", cube_size);
 
-    let cube_color = Color::rgb(0.98, 0.98, 0.96);
-    let cube_material = materials.add(cube_color.into());
+    let cube_material = materials.add(CUBE_COLOR.into());
     let cube_mesh = meshes.add(shape::Cube { size: cube_size }.into());
 
     let cube_count_x = (plane_size_x / cube_size) as usize;
