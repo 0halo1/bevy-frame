@@ -4,7 +4,10 @@ use std::f32::consts::PI;
 const CUBE_COLOR: Color = Color::rgb(0.98, 0.98, 0.96);
 
 use crate::app::{Frame, FrameManager, ResolutionText};
-use crate::{CUBE_COUNT_FACTOR_X, CUBE_COUNT_FACTOR_Y, CUBE_SIZE};
+use crate::{CUBE_COUNT_FACTOR_X, CUBE_COUNT_FACTOR_Y};
+
+// Size of the cube
+const CUBE_SIZE: f32 = 0.25;
 
 // Spawns the UI
 pub(crate) fn setup_ui(mut cmd: Commands) {
@@ -41,14 +44,14 @@ pub(crate) fn setup(
 ) {
     println!("cube_size: {}", CUBE_SIZE);
 
-    let window = windows.single_mut();
-    let window_width = window.width();
-    let window_height = window.height();
-    println!("window_width: {}", window_width);
-    println!("window_height: {}", window_height);
+    // let window = windows.single_mut();
+    // let window_width = window.width();
+    // let window_height = window.height();
+    // println!("window_width: {}", window_width);
+    // println!("window_height: {}", window_height);
 
-    let plane_size_x = window_width / CUBE_COUNT_FACTOR_X;
-    let plane_size_y = window_height / CUBE_COUNT_FACTOR_Y;
+    let plane_size_x = 10.0;
+    let plane_size_y = 10.0;
     println!("plane_size_x: {}", plane_size_x);
     println!("plane_size_y: {}", plane_size_y);
 
@@ -127,7 +130,7 @@ pub(crate) fn setup_camera(mut commands: Commands, mut windows: Query<&mut Windo
 
     // variables
     let fov = 45.0;
-    let c = (window.width() / CUBE_COUNT_FACTOR_X) / (CUBE_SIZE) / 16.0; // 3.2 for square
+    let c = 4.75 - CUBE_SIZE * 2.0;
     let beta = fov / 2.0; // 45/2 always
     println!("c: {}", c);
     println!("beta: {}", beta);

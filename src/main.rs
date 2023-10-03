@@ -14,9 +14,6 @@ const CUBE_COUNT_FACTOR_Y: f32 = 100.0;
 // Color of the cube
 // const CUBE_COLOR: Color = Color::rgb(0.98, 0.98, 0.96);
 
-// Size of the cube
-const CUBE_SIZE: f32 = 0.125;
-
 fn main() {
     logger::logger_setup();
 
