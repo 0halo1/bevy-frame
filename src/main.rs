@@ -1,7 +1,11 @@
-use bevy::{
-    prelude::*,
-    window::{PresentMode, WindowResized, WindowTheme},
-};
+use bevy::prelude::*;
+use bevy::text::{Text, TextStyle};
+use bevy::ui::{Style, Val};
+use bevy::window::{PresentMode, Window, WindowPlugin, WindowResized, WindowTheme};
+use bevy::DefaultPlugins;
+use std::f32::consts::PI;
+
+mod logger;
 
 // The following constants are used to set the resolution of the window.
 const WIDESCREEN: Vec2 = Vec2::new(1920.0, 1080.0);
@@ -19,6 +23,8 @@ const CUBE_COLOR: Color = Color::rgb(0.98, 0.98, 0.96);
 const CUBE_SIZE: f32 = 0.125;
 
 fn main() {
+    logger::logger_setup();
+
     App::new()
         .insert_resource(ResolutionSettings {
             widescreen: WIDESCREEN,
@@ -122,7 +128,11 @@ fn setup(
 
     for x in 0..cube_count_x {
         for y in 0..cube_count_y {
-            // println!("x: {}, y: {}", x, y);
+            println!(
+                "x: {}, y: {}",
+                x as f32 * CUBE_SIZE - cube_offset_x,
+                y as f32 * CUBE_SIZE - cube_offset_y
+            );
             commands.spawn(PbrBundle {
                 mesh: cube_mesh.clone(),
                 material: cube_material.clone(),
@@ -136,25 +146,25 @@ fn setup(
         }
     }
 
-    // draw another layer of cubes on top of the first layer but only on the edges, iterate this 3 times
-    for z in 1..6 {
-        for x in 0..cube_count_x {
-            for y in 0..cube_count_y {
-                if x == 0 || x == cube_count_x - 1 || y == 0 || y == cube_count_y - 1 {
-                    commands.spawn(PbrBundle {
-                        mesh: cube_mesh.clone(),
-                        material: cube_material.clone(),
-                        transform: Transform::from_xyz(
-                            x as f32 * CUBE_SIZE - cube_offset_x,
-                            y as f32 * CUBE_SIZE - cube_offset_y,
-                            z as f32 * CUBE_SIZE,
-                        ),
-                        ..Default::default()
-                    });
-                }
-            }
-        }
-    }
+    // // draw another layer of cubes on top of the first layer but only on the edges, iterate this 3 times
+    // for z in 1..6 {
+    //     for x in 0..cube_count_x {
+    //         for y in 0..cube_count_y {
+    //             if x == 0 || x == cube_count_x - 1 || y == 0 || y == cube_count_y - 1 {
+    //                 commands.spawn(PbrBundle {
+    //                     mesh: cube_mesh.clone(),
+    //                     material: cube_material.clone(),
+    //                     transform: Transform::from_xyz(
+    //                         x as f32 * CUBE_SIZE - cube_offset_x,
+    //                         y as f32 * CUBE_SIZE - cube_offset_y,
+    //                         z as f32 * CUBE_SIZE,
+    //                     ),
+    //                     ..Default::default()
+    //                 });
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 fn setup_light(mut commands: Commands) {
@@ -170,10 +180,21 @@ fn setup_light(mut commands: Commands) {
     });
 }
 
-fn setup_camera(mut commands: Commands) {
+fn setup_camera(mut commands: Commands, mut windows: Query<&mut Window>) {
+    // Calculate distance A from camera to plane based on distance B and plane size
+    let window = windows.single_mut();
+    let window_width = window.width();
+    let plane_size_x = window_width / PLANE_X_MODIFIER;
+    let c = plane_size_x / 2.0;
+    let fov = 45.0 * PI / 180.0;
+    let distance_a = c / (fov).tan();
+    println!("distance_a: {}", distance_a);
+    // let z = plane_size_x / 2.0 - distance_a;
+    // println!("z: {}", z);
+
     // camera
     commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0.0, 0.0, 6.75 * 5.0).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_xyz(0.0, 0.0, distance_a).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
 }
