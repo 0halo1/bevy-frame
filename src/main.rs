@@ -13,8 +13,8 @@ const VERTICAL: Vec2 = Vec2::new(1080.0, 1920.0);
 const SQUARE: Vec2 = Vec2::new(640.0, 640.0);
 
 // The plane is 200x200 units
-const PLANE_X_MODIFIER: f32 = 200.0;
-const PLANE_Y_MODIFIER: f32 = 200.0;
+const PLANE_X_MODIFIER: f32 = 100.0;
+const PLANE_Y_MODIFIER: f32 = 100.0;
 
 // Color of the cube
 const CUBE_COLOR: Color = Color::rgb(0.98, 0.98, 0.96);
@@ -35,7 +35,7 @@ fn main() {
             DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
                     // title: "I am a window!".into(),
-                    resolution: VERTICAL.into(),
+                    resolution: SQUARE.into(),
                     present_mode: PresentMode::AutoVsync,
                     // Tells wasm to resize the window according to the available canvas
                     fit_canvas_to_parent: true,
@@ -128,11 +128,13 @@ fn setup(
 
     for x in 0..cube_count_x {
         for y in 0..cube_count_y {
-            println!(
-                "x: {}, y: {}",
-                x as f32 * CUBE_SIZE - cube_offset_x,
-                y as f32 * CUBE_SIZE - cube_offset_y
-            );
+            if x == 0 && y == 0 || x == cube_count_x - 1 && y == cube_count_y - 1 {
+                println!(
+                    "x: {}, y: {}",
+                    x as f32 * CUBE_SIZE - cube_offset_x,
+                    y as f32 * CUBE_SIZE - cube_offset_y
+                );
+            }
             commands.spawn(PbrBundle {
                 mesh: cube_mesh.clone(),
                 material: cube_material.clone(),
@@ -146,25 +148,25 @@ fn setup(
         }
     }
 
-    // // draw another layer of cubes on top of the first layer but only on the edges, iterate this 3 times
-    // for z in 1..6 {
-    //     for x in 0..cube_count_x {
-    //         for y in 0..cube_count_y {
-    //             if x == 0 || x == cube_count_x - 1 || y == 0 || y == cube_count_y - 1 {
-    //                 commands.spawn(PbrBundle {
-    //                     mesh: cube_mesh.clone(),
-    //                     material: cube_material.clone(),
-    //                     transform: Transform::from_xyz(
-    //                         x as f32 * CUBE_SIZE - cube_offset_x,
-    //                         y as f32 * CUBE_SIZE - cube_offset_y,
-    //                         z as f32 * CUBE_SIZE,
-    //                     ),
-    //                     ..Default::default()
-    //                 });
-    //             }
-    //         }
-    //     }
-    // }
+    // draw another layer of cubes on top of the first layer but only on the edges, iterate this 3 times
+    for z in 1..6 {
+        for x in 0..cube_count_x {
+            for y in 0..cube_count_y {
+                if x == 0 || x == cube_count_x - 1 || y == 0 || y == cube_count_y - 1 {
+                    commands.spawn(PbrBundle {
+                        mesh: cube_mesh.clone(),
+                        material: cube_material.clone(),
+                        transform: Transform::from_xyz(
+                            x as f32 * CUBE_SIZE - cube_offset_x,
+                            y as f32 * CUBE_SIZE - cube_offset_y,
+                            z as f32 * CUBE_SIZE,
+                        ),
+                        ..Default::default()
+                    });
+                }
+            }
+        }
+    }
 }
 
 fn setup_light(mut commands: Commands) {
@@ -185,12 +187,16 @@ fn setup_camera(mut commands: Commands, mut windows: Query<&mut Window>) {
     let window = windows.single_mut();
     let window_width = window.width();
     let plane_size_x = window_width / PLANE_X_MODIFIER;
-    let c = plane_size_x / 2.0;
-    let fov = 45.0 * PI / 180.0;
-    let distance_a = c / (fov).tan();
+
+    // variables
+    let c = plane_size_x / 2.0; // 1.6 for square
+    let beta = 20.0; // 45 always
+    println!("c: {}", c);
+    println!("beta: {}", beta);
+
+    // let fov = 45.0 * PI / 180.0;
+    let distance_a = c / (beta * PI / 180.0).tan();
     println!("distance_a: {}", distance_a);
-    // let z = plane_size_x / 2.0 - distance_a;
-    // println!("z: {}", z);
 
     // camera
     commands.spawn(Camera3dBundle {
