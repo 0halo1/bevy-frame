@@ -128,9 +128,9 @@ pub(crate) fn setup_camera(mut commands: Commands, mut windows: Query<&mut Windo
     // Calculate distance A from camera to plane based on distance B and plane size
     let window = windows.single_mut();
 
-    // variables
+    let plane_size_x = 10.0;
     let fov = 45.0;
-    let c = 4.75 - CUBE_SIZE * 2.0;
+    let c = plane_size_x / 2.0 - CUBE_SIZE * 3.0; // must be 4.25
     let beta = fov / 2.0; // 45/2 always
     println!("c: {}", c);
     println!("beta: {}", beta);

@@ -23,7 +23,7 @@ fn main() {
         FrameManager {
             widescreen: Frame::new(1920.0, 1080.0),
             vertical: Frame::new(1080.0, 1920.0),
-            square: Frame::new(640.0, 640.0),
+            square: Frame::new(1000.0, 1000.0),
         },
         0.125,
     );
