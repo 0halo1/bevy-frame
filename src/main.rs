@@ -15,6 +15,9 @@ const PLANE_Y_MODIFIER: f32 = 200.0;
 // Color of the cube
 const CUBE_COLOR: Color = Color::rgb(0.98, 0.98, 0.96);
 
+// Size of the cube
+const CUBE_SIZE: f32 = 0.125;
+
 fn main() {
     App::new()
         .insert_resource(ResolutionSettings {
@@ -91,6 +94,8 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut windows: Query<&mut Window>,
 ) {
+    println!("cube_size: {}", CUBE_SIZE);
+
     let window = windows.single_mut();
     let window_width = window.width();
     let window_height = window.height();
@@ -102,29 +107,28 @@ fn setup(
     println!("plane_size_x: {}", plane_size_x);
     println!("plane_size_y: {}", plane_size_y);
 
-    let cube_size = 0.125;
-    println!("cube_size: {}", cube_size);
-
     let cube_material = materials.add(CUBE_COLOR.into());
-    let cube_mesh = meshes.add(shape::Cube { size: cube_size }.into());
+    let cube_mesh = meshes.add(shape::Cube { size: CUBE_SIZE }.into());
 
-    let cube_count_x = (plane_size_x / cube_size) as usize;
-    let cube_count_y = (plane_size_y / cube_size) as usize;
-    println!("cube_count: {}", cube_count_x);
+    let cube_count_x = (plane_size_x / CUBE_SIZE) as usize;
+    let cube_count_y = (plane_size_y / CUBE_SIZE) as usize;
+    println!("cube_count_x: {}", cube_count_x);
+    println!("cube_count_y: {}", cube_count_y);
 
-    let cube_offset_x = plane_size_x / 2.0 - cube_size / 2.0;
-    let cube_offset_y = plane_size_y / 2.0 - cube_size / 2.0;
+    let cube_offset_x = plane_size_x / 2.0 - CUBE_SIZE / 2.0;
+    let cube_offset_y = plane_size_y / 2.0 - CUBE_SIZE / 2.0;
     println!("cube_offset_x: {}", cube_offset_x);
     println!("cube_offset_y: {}", cube_offset_y);
 
     for x in 0..cube_count_x {
         for y in 0..cube_count_y {
+            // println!("x: {}, y: {}", x, y);
             commands.spawn(PbrBundle {
                 mesh: cube_mesh.clone(),
                 material: cube_material.clone(),
                 transform: Transform::from_xyz(
-                    x as f32 * cube_size - cube_offset_x,
-                    y as f32 * cube_size - cube_offset_y,
+                    x as f32 * CUBE_SIZE - cube_offset_x,
+                    y as f32 * CUBE_SIZE - cube_offset_y,
                     0.0,
                 ),
                 ..Default::default()
@@ -141,9 +145,9 @@ fn setup(
                         mesh: cube_mesh.clone(),
                         material: cube_material.clone(),
                         transform: Transform::from_xyz(
-                            x as f32 * cube_size - cube_offset_x,
-                            y as f32 * cube_size - cube_offset_y,
-                            z as f32 * cube_size,
+                            x as f32 * CUBE_SIZE - cube_offset_x,
+                            y as f32 * CUBE_SIZE - cube_offset_y,
+                            z as f32 * CUBE_SIZE,
                         ),
                         ..Default::default()
                     });
