@@ -5,12 +5,14 @@ use bevy::window::{PresentMode, Window, WindowPlugin, WindowResized, WindowTheme
 use bevy::DefaultPlugins;
 use std::f32::consts::PI;
 
+use crate::frame::Frame;
+
+mod frame;
 mod logger;
 
-// The following constants are used to set the resolution of the window.
-const WIDESCREEN: Vec2 = Vec2::new(1920.0, 1080.0);
-const VERTICAL: Vec2 = Vec2::new(1080.0, 1920.0);
-const SQUARE: Vec2 = Vec2::new(640.0, 640.0);
+const WIDESCREEN: Frame = Frame::new(1920.0, 1080.0);
+const VERTICAL: Frame = Frame::new(1080.0, 1920.0);
+const SQUARE: Frame = Frame::new(640.0, 640.0);
 
 // The plane is 200x200 units
 const PLANE_X_MODIFIER: f32 = 100.0;
@@ -25,17 +27,20 @@ const CUBE_SIZE: f32 = 0.125;
 fn main() {
     logger::logger_setup();
 
+    let app_name: &str = "Bevy Frame";
+    let app_resolution: Vec2 = SQUARE.into();
+
     App::new()
         .insert_resource(ResolutionSettings {
-            widescreen: WIDESCREEN,
-            vertical: VERTICAL,
-            square: SQUARE,
+            widescreen: WIDESCREEN.into(),
+            vertical: VERTICAL.into(),
+            square: SQUARE.into(),
         })
         .add_plugins((
             DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
-                    // title: "I am a window!".into(),
-                    resolution: SQUARE.into(),
+                    title: app_name.into(),
+                    resolution: app_resolution.into(),
                     present_mode: PresentMode::AutoVsync,
                     // Tells wasm to resize the window according to the available canvas
                     fit_canvas_to_parent: true,
