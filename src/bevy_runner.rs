@@ -4,7 +4,7 @@ use std::f32::consts::PI;
 const CUBE_COLOR: Color = Color::rgb(0.98, 0.98, 0.96);
 
 use crate::app::{Frame, FrameManager, ResolutionText};
-use crate::{CUBE_SIZE, PLANE_X_MODIFIER, PLANE_Y_MODIFIER};
+use crate::{CUBE_COUNT_FACTOR_X, CUBE_COUNT_FACTOR_Y, CUBE_SIZE};
 
 // Spawns the UI
 pub(crate) fn setup_ui(mut cmd: Commands) {
@@ -47,8 +47,8 @@ pub(crate) fn setup(
     println!("window_width: {}", window_width);
     println!("window_height: {}", window_height);
 
-    let plane_size_x = window_width / PLANE_X_MODIFIER;
-    let plane_size_y = window_height / PLANE_Y_MODIFIER;
+    let plane_size_x = window_width / CUBE_COUNT_FACTOR_X;
+    let plane_size_y = window_height / CUBE_COUNT_FACTOR_Y;
     println!("plane_size_x: {}", plane_size_x);
     println!("plane_size_y: {}", plane_size_y);
 
@@ -124,22 +124,28 @@ pub(crate) fn setup_light(mut commands: Commands) {
 pub(crate) fn setup_camera(mut commands: Commands, mut windows: Query<&mut Window>) {
     // Calculate distance A from camera to plane based on distance B and plane size
     let window = windows.single_mut();
-    let window_width = window.width();
-    let plane_size_x = window_width / PLANE_X_MODIFIER;
 
     // variables
-    let c = plane_size_x / 2.0; // 1.6 for square
-    let beta = 20.0; // 45 always
+    let fov = 45.0;
+    let c = (window.width() / CUBE_COUNT_FACTOR_X) / (CUBE_SIZE) / 16.0; // 3.2 for square
+    let beta = fov / 2.0; // 45/2 always
     println!("c: {}", c);
     println!("beta: {}", beta);
 
     // let fov = 45.0 * PI / 180.0;
-    let distance_a = c / (beta * PI / 180.0).tan();
-    println!("distance_a: {}", distance_a);
+    let z = c / (beta * (PI / 180.0)).tan();
+    println!("z: {}", z);
 
     // camera
     commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(0.0, 0.0, distance_a).looking_at(Vec3::ZERO, Vec3::Y),
+        projection: Projection::Perspective(PerspectiveProjection {
+            fov,
+            // near: 0.1,
+            // far: 1000.0,
+            aspect_ratio: window.width() / window.height(),
+            ..Default::default()
+        }),
+        transform: Transform::from_xyz(0.0, 0.0, z).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
 }

@@ -8,8 +8,8 @@ mod app;
 mod logger;
 
 // The plane is 200x200 units
-const PLANE_X_MODIFIER: f32 = 100.0;
-const PLANE_Y_MODIFIER: f32 = 100.0;
+const CUBE_COUNT_FACTOR_X: f32 = 100.0;
+const CUBE_COUNT_FACTOR_Y: f32 = 100.0;
 
 // Color of the cube
 // const CUBE_COLOR: Color = Color::rgb(0.98, 0.98, 0.96);
