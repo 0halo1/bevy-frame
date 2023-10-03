@@ -1,4 +1,5 @@
 use bevy::{
+    pbr::wireframe::WireframePlugin,
     prelude::{default, Component, PluginGroup, Resource, Startup, Update, Vec2},
     window::{PresentMode, Window, WindowPlugin, WindowResolution, WindowTheme},
     DefaultPlugins,
@@ -34,6 +35,7 @@ impl App {
                     }),
                     ..default()
                 }),
+                // WireframePlugin,
                 // LogDiagnosticsPlugin::default(),
                 // FrameTimeDiagnosticsPlugin,
             ))

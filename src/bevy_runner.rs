@@ -109,6 +109,51 @@ pub(crate) fn setup(
             }
         }
     }
+
+    // let wireframe_cube_size = CUBE_SIZE * cube_count_x as f32 / 2.0;
+    let wireframe_cube_color = Color::rgb(0.0, 0.0, 0.0);
+    let wireframe_cube_material = materials.add(wireframe_cube_color.into());
+    let wireframe_cube_mesh = meshes.add(
+        shape::Capsule {
+            radius: CUBE_SIZE / 8.0,
+            depth: CUBE_SIZE / 8.0,
+            ..Default::default()
+        }
+        .into(),
+    );
+
+    // commands.spawn(PbrBundle {
+    //     mesh: wireframe_cube_mesh.clone(),
+    //     material: wireframe_cube_material.clone(),
+    //     transform: Transform::from_xyz(0.0, 0.0, 0.0),
+    //     ..Default::default()
+    // });
+
+    for z in 1..5 {
+        for x in 1..cube_count_x {
+            for y in 1..cube_count_y as usize {
+                let pos_x = x as f32 * (plane_size_x - CUBE_SIZE) / (cube_count_x - 1) as f32
+                    - plane_size_x / 2.0
+                    + CUBE_SIZE / 2.0;
+                let pos_y = y as f32 * (plane_size_y - CUBE_SIZE) / (cube_count_y - 1) as f32
+                    - plane_size_y / 2.0
+                    + CUBE_SIZE / 2.0;
+                println!("pos_x: {}, pos_y: {}, z: {}", pos_x, pos_y, z);
+
+                // if random less than 0.5 continue
+                if rand::random::<f32>() < 0.5 {
+                    continue;
+                }
+
+                commands.spawn(PbrBundle {
+                    mesh: wireframe_cube_mesh.clone(),
+                    material: wireframe_cube_material.clone(),
+                    transform: Transform::from_xyz(pos_x, pos_y, z as f32 * CUBE_SIZE),
+                    ..Default::default()
+                });
+            }
+        }
+    }
 }
 
 pub(crate) fn setup_light(mut commands: Commands) {
