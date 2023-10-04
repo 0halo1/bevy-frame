@@ -1,13 +1,9 @@
-use bevy::window::{PresentMode, WindowResized};
-use bevy::{prelude::*, window::WindowTheme};
+use bevy::prelude::*;
+use bevy::window::WindowResized;
 use std::f32::consts::PI;
 const CUBE_COLOR: Color = Color::rgb(0.98, 0.98, 0.96);
 
-use crate::app::{Frame, FrameManager, ResolutionText};
-use crate::{CUBE_COUNT_FACTOR_X, CUBE_COUNT_FACTOR_Y};
-
-// Size of the cube
-const CUBE_SIZE: f32 = 0.25;
+use crate::app::{CubeManager, Frame, FrameManager, ResolutionText};
 
 // Spawns the UI
 pub(crate) fn setup_ui(mut cmd: Commands) {
@@ -40,31 +36,24 @@ pub(crate) fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut windows: Query<&mut Window>,
+    cube_manager: Res<CubeManager>,
 ) {
-    println!("cube_size: {}", CUBE_SIZE);
-
-    // let window = windows.single_mut();
-    // let window_width = window.width();
-    // let window_height = window.height();
-    // println!("window_width: {}", window_width);
-    // println!("window_height: {}", window_height);
-
+    let cube_size = cube_manager.size;
     let plane_size_x = 10.0;
     let plane_size_y = 10.0;
     println!("plane_size_x: {}", plane_size_x);
     println!("plane_size_y: {}", plane_size_y);
 
     let cube_material = materials.add(CUBE_COLOR.into());
-    let cube_mesh = meshes.add(shape::Cube { size: CUBE_SIZE }.into());
+    let cube_mesh = meshes.add(shape::Cube { size: cube_size }.into());
 
-    let cube_count_x = (plane_size_x / CUBE_SIZE) as usize;
-    let cube_count_y = (plane_size_y / CUBE_SIZE) as usize;
+    let cube_count_x = (plane_size_x / cube_size) as usize;
+    let cube_count_y = (plane_size_y / cube_size) as usize;
     println!("cube_count_x: {}", cube_count_x);
     println!("cube_count_y: {}", cube_count_y);
 
-    let cube_offset_x = plane_size_x / 2.0 - CUBE_SIZE / 2.0;
-    let cube_offset_y = plane_size_y / 2.0 - CUBE_SIZE / 2.0;
+    let cube_offset_x = plane_size_x / 2.0 - cube_size / 2.0;
+    let cube_offset_y = plane_size_y / 2.0 - cube_size / 2.0;
     println!("cube_offset_x: {}", cube_offset_x);
     println!("cube_offset_y: {}", cube_offset_y);
 
@@ -73,16 +62,16 @@ pub(crate) fn setup(
             if x == 0 && y == 0 || x == cube_count_x - 1 && y == cube_count_y - 1 {
                 println!(
                     "x: {}, y: {}",
-                    x as f32 * CUBE_SIZE - cube_offset_x,
-                    y as f32 * CUBE_SIZE - cube_offset_y
+                    x as f32 * cube_size - cube_offset_x,
+                    y as f32 * cube_size - cube_offset_y
                 );
             }
             commands.spawn(PbrBundle {
                 mesh: cube_mesh.clone(),
                 material: cube_material.clone(),
                 transform: Transform::from_xyz(
-                    x as f32 * CUBE_SIZE - cube_offset_x,
-                    y as f32 * CUBE_SIZE - cube_offset_y,
+                    x as f32 * cube_size - cube_offset_x,
+                    y as f32 * cube_size - cube_offset_y,
                     0.0,
                 ),
                 ..Default::default()
@@ -99,9 +88,9 @@ pub(crate) fn setup(
                         mesh: cube_mesh.clone(),
                         material: cube_material.clone(),
                         transform: Transform::from_xyz(
-                            x as f32 * CUBE_SIZE - cube_offset_x,
-                            y as f32 * CUBE_SIZE - cube_offset_y,
-                            z as f32 * CUBE_SIZE,
+                            x as f32 * cube_size - cube_offset_x,
+                            y as f32 * cube_size - cube_offset_y,
+                            z as f32 * cube_size,
                         ),
                         ..Default::default()
                     });
@@ -124,13 +113,18 @@ pub(crate) fn setup_light(mut commands: Commands) {
     });
 }
 
-pub(crate) fn setup_camera(mut commands: Commands, mut windows: Query<&mut Window>) {
+pub(crate) fn setup_camera(
+    mut commands: Commands,
+    mut windows: Query<&mut Window>,
+    cube_manager: Res<CubeManager>,
+) {
+    let cube_size = cube_manager.size;
     // Calculate distance A from camera to plane based on distance B and plane size
     let window = windows.single_mut();
 
     let plane_size_x = 10.0;
     let fov = 45.0;
-    let c = plane_size_x / 2.0 - CUBE_SIZE * 3.0; // must be 4.25
+    let c = plane_size_x / 2.0 - cube_size * 3.0; // must be 4.25
     let beta = fov / 2.0; // 45/2 always
     println!("c: {}", c);
     println!("beta: {}", beta);

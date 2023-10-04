@@ -10,14 +10,18 @@ use crate::bevy_runner::{
 
 pub struct App {
     app_name: &'static str,
-    cube_size: f32,
 }
 
 impl App {
-    pub fn new(app_name: &'static str, frame_manager: FrameManager, cube_size: f32) -> Self {
+    pub fn new(
+        app_name: &'static str,
+        frame_manager: FrameManager,
+        cube_manager: CubeManager,
+    ) -> Self {
         let resolution: WindowResolution = (*frame_manager.default()).into();
         bevy::prelude::App::new()
             .insert_resource(frame_manager)
+            .insert_resource(cube_manager)
             .add_plugins((
                 DefaultPlugins.set(WindowPlugin {
                     primary_window: Some(Window {
@@ -40,18 +44,11 @@ impl App {
             .add_systems(Startup, (setup, setup_light, setup_camera, setup_ui))
             .add_systems(Update, (on_resize_system, toggle_resolution))
             .run();
-        Self {
-            app_name,
-            cube_size,
-        }
+        Self { app_name }
     }
 
     pub fn app_name(&self) -> &'static str {
         self.app_name
-    }
-
-    pub fn cube_size(&self) -> f32 {
-        self.cube_size
     }
 }
 
@@ -92,6 +89,11 @@ pub struct FrameManager {
     pub(crate) widescreen: Frame, // 16:9
     pub(crate) vertical: Frame,   // 9:16
     pub(crate) square: Frame,     // 1:1
+}
+
+#[derive(Resource)]
+pub struct CubeManager {
+    pub(crate) size: f32,
 }
 
 impl FrameManager {
