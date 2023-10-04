@@ -2,7 +2,11 @@ use bevy::prelude::*;
 use bevy::window::WindowResized;
 use std::f32::consts::PI;
 
-use crate::app::{Frame, FrameManager, GeometryManager, ResolutionText};
+use crate::app::{Frame, GeometryManager, ViewportManager};
+
+/// Marker component for the text that displays the current resolution.
+#[derive(Component)]
+pub(crate) struct ResolutionText;
 
 // Spawns the UI
 pub(crate) fn setup_ui(mut cmd: Commands) {
@@ -79,7 +83,7 @@ pub(crate) fn setup_camera(
 pub(crate) fn toggle_resolution(
     keys: Res<Input<KeyCode>>,
     mut windows: Query<&mut Window>,
-    resolution: Res<FrameManager>,
+    resolution: Res<ViewportManager>,
 ) {
     let mut window = windows.single_mut();
 

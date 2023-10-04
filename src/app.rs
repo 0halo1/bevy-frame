@@ -1,5 +1,5 @@
 use bevy::{
-    prelude::{default, Color, Component, PluginGroup, Resource, Startup, Update, Vec2},
+    prelude::{default, Color, Component, PluginGroup, Resource, Startup, Update, Vec2, Vec3},
     window::{PresentMode, Window, WindowPlugin, WindowResolution, WindowTheme},
     DefaultPlugins,
 };
@@ -11,14 +11,14 @@ use crate::{
 
 pub struct App {
     app_name: &'static str,
-    frame_manager: FrameManager,
+    frame_manager: ViewportManager,
     geometry_manager: GeometryManager,
 }
 
 impl App {
     pub fn new(
         app_name: &'static str,
-        frame_manager: FrameManager,
+        frame_manager: ViewportManager,
         geometry_manager: GeometryManager,
     ) -> Self {
         let default_frame = *frame_manager.default();
@@ -92,25 +92,14 @@ impl Into<WindowResolution> for Frame {
     }
 }
 
-/// Marker component for the text that displays the current resolution.
-#[derive(Component)]
-pub(crate) struct ResolutionText;
-
 #[derive(Resource, Clone, Copy)]
-pub struct FrameManager {
+pub struct ViewportManager {
     pub(crate) widescreen: Frame, // 16:9
     pub(crate) vertical: Frame,   // 9:16
     pub(crate) square: Frame,     // 1:1
 }
 
-#[derive(Resource, Clone, Copy)]
-pub struct GeometryManager {
-    pub cube_size: f32,
-    pub frame_size: f32,
-    pub cube_color: Color,
-}
-
-impl FrameManager {
+impl ViewportManager {
     /**
      * Returns the default frame, which is the square frame.
      * This is used when the user has not selected a resolution.
@@ -118,4 +107,22 @@ impl FrameManager {
     pub(crate) fn default(&self) -> &Frame {
         &self.square
     }
+}
+
+#[derive(Resource, Clone, Copy)]
+pub struct GeometryManager {
+    /// The size of the frame in world units
+    pub frame_size: f32,
+
+    /// The number of iterations for the frame. Note: scaled by cube_size.
+    pub frame_thickness: usize,
+
+    /// The size of the cubes in world units
+    pub frame_cube_size: f32,
+
+    /// The color of the cubes
+    pub frame_cube_color: Color,
+
+    /// The start position of the frame in world units
+    pub frame_start_position: Vec3,
 }
