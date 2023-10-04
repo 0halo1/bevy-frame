@@ -1,9 +1,8 @@
 use bevy::prelude::*;
 use bevy::window::WindowResized;
 use std::f32::consts::PI;
-const CUBE_COLOR: Color = Color::rgb(0.98, 0.98, 0.96);
 
-use crate::app::{CubeManager, Frame, FrameManager, ResolutionText};
+use crate::app::{Frame, FrameManager, GeometryManager, ResolutionText};
 
 // Spawns the UI
 pub(crate) fn setup_ui(mut cmd: Commands) {
@@ -47,15 +46,13 @@ pub(crate) fn setup_light(mut commands: Commands) {
 pub(crate) fn setup_camera(
     mut commands: Commands,
     mut windows: Query<&mut Window>,
-    cube_manager: Res<CubeManager>,
+    cube_manager: Res<GeometryManager>,
 ) {
-    let cube_size = cube_manager.size;
     // Calculate distance A from camera to plane based on distance B and plane size
     let window = windows.single_mut();
 
-    let plane_size_x = 10.0;
     let fov = 45.0;
-    let c = plane_size_x / 2.0 - cube_size * 3.0; // must be 4.25
+    let c = cube_manager.frame_size / 2.0;
     let beta = fov / 2.0; // 45/2 always
     println!("c: {}", c);
     println!("beta: {}", beta);

@@ -1,7 +1,7 @@
 use app::{App, Frame, FrameManager};
 use bevy::prelude::Color;
 
-use crate::app::CubeManager;
+use crate::app::GeometryManager;
 
 mod app;
 mod bevy_runner;
@@ -17,9 +17,10 @@ fn main() {
             vertical: Frame::new(1080.0, 1920.0),
             square: Frame::new(640.0, 640.0),
         },
-        CubeManager {
-            size: 0.1,
-            color: Color::rgb(0.98, 0.98, 0.96),
+        GeometryManager {
+            cube_size: 0.1,
+            frame_size: 10.0,
+            cube_color: Color::rgb(0.98, 0.98, 0.96),
         },
     );
 

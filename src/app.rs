@@ -12,21 +12,21 @@ use crate::{
 pub struct App {
     app_name: &'static str,
     frame_manager: FrameManager,
-    cube_manager: CubeManager,
+    geometry_manager: GeometryManager,
 }
 
 impl App {
     pub fn new(
         app_name: &'static str,
         frame_manager: FrameManager,
-        cube_manager: CubeManager,
+        geometry_manager: GeometryManager,
     ) -> Self {
         let default_frame = *frame_manager.default();
         let resolution: WindowResolution = (default_frame).into();
         logger::logger_setup();
         bevy::prelude::App::new()
             .insert_resource(frame_manager)
-            .insert_resource(cube_manager)
+            .insert_resource(geometry_manager)
             .add_plugins((
                 DefaultPlugins.set(WindowPlugin {
                     primary_window: Some(Window {
@@ -55,7 +55,7 @@ impl App {
         Self {
             app_name,
             frame_manager,
-            cube_manager,
+            geometry_manager,
         }
     }
 
@@ -104,9 +104,10 @@ pub struct FrameManager {
 }
 
 #[derive(Resource, Clone, Copy)]
-pub struct CubeManager {
-    pub size: f32,
-    pub color: Color,
+pub struct GeometryManager {
+    pub cube_size: f32,
+    pub frame_size: f32,
+    pub cube_color: Color,
 }
 
 impl FrameManager {
