@@ -54,27 +54,24 @@ pub(crate) fn setup_camera(
 ) {
     // Calculate distance A from camera to plane based on distance B and plane size
     let window = windows.single_mut();
-
+    let frame_start_position = cube_manager.frame_start_position;
+    let frame_size = cube_manager.frame_thickness;
+    let cube_size = cube_manager.frame_cube_size;
     let fov = 45.0;
     let c = cube_manager.frame_size / 2.0;
-    let beta = fov / 2.0; // 45/2 always
-    println!("c: {}", c);
-    println!("beta: {}", beta);
+    let beta: f32 = fov / 2.0;
+    let z = c * (1.0 + 1.0 / beta.tan()) - c + frame_size as f32 * cube_size;
 
-    // let fov = 45.0 * PI / 180.0;
-    let z = c / (beta * (PI / 180.0)).tan();
-    println!("z: {}", z);
-
-    // camera
+    // Camera
     commands.spawn(Camera3dBundle {
         projection: Projection::Perspective(PerspectiveProjection {
             fov,
-            // near: 0.1,
-            // far: 1000.0,
+            near: 0.1,
+            far: 1000.0,
             aspect_ratio: window.height() / window.width(),
             ..Default::default()
         }),
-        transform: Transform::from_xyz(0.0, 0.0, z).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_xyz(0.0, 0.0, z).looking_at(frame_start_position, Vec3::Y),
         ..default()
     });
 }

@@ -105,7 +105,7 @@ impl ViewportManager {
      * This is used when the user has not selected a resolution.
      */
     pub(crate) fn default(&self) -> &Frame {
-        &self.square
+        &self.widescreen
     }
 }
 

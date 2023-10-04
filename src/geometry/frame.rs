@@ -33,6 +33,9 @@ pub fn draw(
         frame_size / 2.0 - cube_size / 2.0 + frame_start_position.y,
     ];
 
+    println!("cube_offset_x: {}", cube_offset_x);
+    println!("cube_offset_y: {}", cube_offset_y);
+
     /* Draw the first layer of cubes, iterate through the x and y axis and spawn a cube at each position*/
     for x in 0..cube_count_x {
         for y in 0..cube_count_y {
