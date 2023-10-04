@@ -77,8 +77,15 @@ impl Frame {
         Self { res_x, res_y }
     }
 
-    pub(crate) fn aspect_ratio(&self) -> f32 {
+    pub fn aspect_ratio(&self) -> f32 {
         self.res_y / self.res_x
+    }
+
+    pub fn aspect_scaling(&self, frame_size: f32) -> [f32; 2] {
+        return [
+            frame_size * 1.0 / self.aspect_ratio(),
+            frame_size * self.aspect_ratio(),
+        ];
     }
 }
 

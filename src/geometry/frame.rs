@@ -16,17 +16,12 @@ pub fn draw(
     /* Initialize the scene */
     let cube_size = cube_manager.frame_cube_size;
     let cube_color = cube_manager.frame_cube_color;
-
-    /* Scale frame_size by width and height for x and y */
-    let default_aspect_ratio = viewport_manager.default().aspect_ratio();
-    let frame_size_x: f32 = cube_manager.frame_size * 1.0 / default_aspect_ratio;
-    let frame_size_y: f32 = cube_manager.frame_size * default_aspect_ratio;
-    println!("r {}", default_aspect_ratio);
-    println!("x {}", frame_size_x);
-    println!("y {}", frame_size_y);
-
+    let frame_size = cube_manager.frame_size;
     let frame_thickness: usize = cube_manager.frame_thickness;
     let frame_start_position = cube_manager.frame_start_position;
+
+    /* Scale frame_size by width and height for x and y */
+    let [frame_size_x, frame_size_y] = viewport_manager.default().aspect_scaling(frame_size);
 
     /* Initialize the material & mesh */
     let cube_material = materials.add(cube_color.into());
