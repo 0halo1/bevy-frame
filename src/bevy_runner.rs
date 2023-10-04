@@ -1,10 +1,10 @@
+use bevy::math::cubic_splines::CubicCurve;
+use bevy::math::vec3;
 use bevy::window::{PresentMode, WindowResized};
 use bevy::{prelude::*, window::WindowTheme};
 use std::f32::consts::PI;
 const CUBE_COLOR: Color = Color::rgb(0.98, 0.98, 0.96);
-
 use crate::app::{Frame, FrameManager, ResolutionText};
-use crate::{CUBE_COUNT_FACTOR_X, CUBE_COUNT_FACTOR_Y};
 
 // Size of the cube
 const CUBE_SIZE: f32 = 0.25;
@@ -129,6 +129,13 @@ pub(crate) fn setup(
     //     ..Default::default()
     // });
 
+    let points = [[
+        vec3(-3., 2., 3.),
+        vec3(3., 8., 3.),
+        vec3(-3., 8., 1.5),
+        vec3(2., 2., 1.2),
+    ]];
+
     for z in 1..5 {
         for x in 1..cube_count_x {
             for y in 1..cube_count_y as usize {
@@ -145,12 +152,18 @@ pub(crate) fn setup(
                     continue;
                 }
 
-                commands.spawn(PbrBundle {
-                    mesh: wireframe_cube_mesh.clone(),
-                    material: wireframe_cube_material.clone(),
-                    transform: Transform::from_xyz(pos_x, pos_y, z as f32 * CUBE_SIZE),
-                    ..Default::default()
-                });
+                // Make a CubicCurve
+                // let bezier = Bezier::new(points).to_curve();
+
+                commands.spawn((
+                    PbrBundle {
+                        mesh: wireframe_cube_mesh.clone(),
+                        material: wireframe_cube_material.clone(),
+                        transform: Transform::from_xyz(pos_x, pos_y, z as f32 * CUBE_SIZE),
+                        ..Default::default()
+                    },
+                    // Curve(bezier),
+                ));
             }
         }
     }
@@ -230,5 +243,24 @@ pub(crate) fn on_resize_system(
     for e in resize_reader.iter() {
         // When resolution is being changed
         text.sections[0].value = format!("{:.1} x {:.1}", e.width, e.height);
+    }
+}
+
+#[derive(Component)]
+pub struct Curve(CubicCurve<Vec3>);
+
+pub fn animate_cube(
+    time: Res<Time>,
+    mut query: Query<(&mut Transform, &Curve)>,
+    mut gizmos: Gizmos,
+) {
+    let t = (time.elapsed_seconds().sin() + 1.) / 2.;
+
+    for (mut transform, cubic_curve) in &mut query {
+        // Draw the curve
+        gizmos.linestrip(cubic_curve.0.iter_positions(50), Color::WHITE);
+        // position takes a point from the curve where 0 is the initial point
+        // and 1 is the last point
+        transform.translation = cubic_curve.0.position(t);
     }
 }

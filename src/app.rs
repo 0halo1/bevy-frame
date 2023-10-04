@@ -6,7 +6,7 @@ use bevy::{
 };
 
 use crate::bevy_runner::{
-    on_resize_system, setup, setup_camera, setup_light, setup_ui, toggle_resolution,
+    animate_cube, on_resize_system, setup, setup_camera, setup_light, setup_ui, toggle_resolution,
 };
 
 pub struct App {
@@ -41,6 +41,7 @@ impl App {
             ))
             .add_systems(Startup, (setup, setup_light, setup_camera, setup_ui))
             .add_systems(Update, (on_resize_system, toggle_resolution))
+            .add_systems(Update, animate_cube)
             .run();
         Self {
             app_name,
