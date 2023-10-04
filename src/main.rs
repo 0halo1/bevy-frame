@@ -19,7 +19,7 @@ fn main() {
         },
         GeometryManager {
             frame_thickness: 6,
-            frame_cube_size: 0.1,
+            frame_cube_size: 0.2,
             frame_size: 10.0,
             frame_cube_color: Color::rgb(0.98, 0.98, 0.96),
             frame_start_position: Vec3::new(0.0, 0.0, 0.0),

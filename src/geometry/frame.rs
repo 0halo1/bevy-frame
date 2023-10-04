@@ -4,18 +4,27 @@ use bevy::prelude::{
     shape, Assets, Commands, Mesh, PbrBundle, Res, ResMut, StandardMaterial, Transform,
 };
 
-use crate::app::GeometryManager;
+use crate::app::{GeometryManager, ViewportManager};
 
 pub fn draw(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     cube_manager: Res<GeometryManager>,
+    viewport_manager: Res<ViewportManager>,
 ) {
     /* Initialize the scene */
     let cube_size = cube_manager.frame_cube_size;
     let cube_color = cube_manager.frame_cube_color;
-    let frame_size: f32 = cube_manager.frame_size;
+
+    /* Scale frame_size by width and height for x and y */
+    let default_aspect_ratio = viewport_manager.default().aspect_ratio();
+    let frame_size_x: f32 = cube_manager.frame_size * 1.0 / default_aspect_ratio;
+    let frame_size_y: f32 = cube_manager.frame_size * default_aspect_ratio;
+    println!("r {}", default_aspect_ratio);
+    println!("x {}", frame_size_x);
+    println!("y {}", frame_size_y);
+
     let frame_thickness: usize = cube_manager.frame_thickness;
     let frame_start_position = cube_manager.frame_start_position;
 
@@ -25,12 +34,12 @@ pub fn draw(
 
     /* Intialize the structure */
     let [cube_count_x, cube_count_y] = [
-        (frame_size / cube_size) as usize,
-        (frame_size / cube_size) as usize,
+        (frame_size_x / cube_size) as usize,
+        (frame_size_y / cube_size) as usize,
     ];
     let [cube_offset_x, cube_offset_y] = [
-        frame_size / 2.0 - cube_size / 2.0 + frame_start_position.x,
-        frame_size / 2.0 - cube_size / 2.0 + frame_start_position.y,
+        frame_size_x / 2.0 - cube_size / 2.0 + frame_start_position.x,
+        frame_size_y / 2.0 - cube_size / 2.0 + frame_start_position.y,
     ];
 
     println!("cube_offset_x: {}", cube_offset_x);

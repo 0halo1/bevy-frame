@@ -1,3 +1,5 @@
+// app
+
 use bevy::{
     prelude::{default, Color, Component, PluginGroup, Resource, Startup, Update, Vec2, Vec3},
     window::{PresentMode, Window, WindowPlugin, WindowResolution, WindowTheme},
@@ -105,7 +107,7 @@ impl ViewportManager {
      * This is used when the user has not selected a resolution.
      */
     pub(crate) fn default(&self) -> &Frame {
-        &self.widescreen
+        &self.square
     }
 }
 

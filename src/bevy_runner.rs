@@ -49,18 +49,20 @@ pub(crate) fn setup_light(mut commands: Commands) {
 
 pub(crate) fn setup_camera(
     mut commands: Commands,
-    mut windows: Query<&mut Window>,
     cube_manager: Res<GeometryManager>,
+    viewport_manager: Res<ViewportManager>,
 ) {
     // Calculate distance A from camera to plane based on distance B and plane size
-    let window = windows.single_mut();
+    let aspect_ratio = viewport_manager.default().aspect_ratio();
     let frame_start_position = cube_manager.frame_start_position;
-    let frame_size = cube_manager.frame_thickness;
+    let frame_size_x: f32 = cube_manager.frame_size * 1.0 / aspect_ratio;
+    let frame_thickeness = cube_manager.frame_thickness;
+
     let cube_size = cube_manager.frame_cube_size;
     let fov = 45.0;
-    let c = cube_manager.frame_size / 2.0;
+    let c = frame_size_x / 2.0;
     let beta: f32 = fov / 2.0;
-    let z = c * (1.0 + 1.0 / beta.tan()) - c + frame_size as f32 * cube_size;
+    let z = c * (1.0 + 1.0 / beta.tan()) - c + frame_thickeness as f32 * cube_size;
 
     // Camera
     commands.spawn(Camera3dBundle {
@@ -68,7 +70,7 @@ pub(crate) fn setup_camera(
             fov,
             near: 0.1,
             far: 1000.0,
-            aspect_ratio: window.height() / window.width(),
+            aspect_ratio,
             ..Default::default()
         }),
         transform: Transform::from_xyz(0.0, 0.0, z).looking_at(frame_start_position, Vec3::Y),
