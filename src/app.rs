@@ -1,15 +1,18 @@
 use bevy::{
-    prelude::{default, Component, PluginGroup, Resource, Startup, Update, Vec2},
+    prelude::{default, Color, Component, PluginGroup, Resource, Startup, Update, Vec2},
     window::{PresentMode, Window, WindowPlugin, WindowResolution, WindowTheme},
     DefaultPlugins,
 };
 
-use crate::bevy_runner::{
-    on_resize_system, setup, setup_camera, setup_light, setup_ui, toggle_resolution,
+use crate::{
+    bevy_runner::{on_resize_system, setup_camera, setup_light, setup_ui, toggle_resolution},
+    geometry, logger,
 };
 
 pub struct App {
     app_name: &'static str,
+    frame_manager: FrameManager,
+    cube_manager: CubeManager,
 }
 
 impl App {
@@ -18,7 +21,9 @@ impl App {
         frame_manager: FrameManager,
         cube_manager: CubeManager,
     ) -> Self {
-        let resolution: WindowResolution = (*frame_manager.default()).into();
+        let default_frame = *frame_manager.default();
+        let resolution: WindowResolution = (default_frame).into();
+        logger::logger_setup();
         bevy::prelude::App::new()
             .insert_resource(frame_manager)
             .insert_resource(cube_manager)
@@ -41,10 +46,17 @@ impl App {
                 // LogDiagnosticsPlugin::default(),
                 // FrameTimeDiagnosticsPlugin,
             ))
-            .add_systems(Startup, (setup, setup_light, setup_camera, setup_ui))
+            .add_systems(
+                Startup,
+                (geometry::frame::draw, setup_light, setup_camera, setup_ui),
+            )
             .add_systems(Update, (on_resize_system, toggle_resolution))
             .run();
-        Self { app_name }
+        Self {
+            app_name,
+            frame_manager,
+            cube_manager,
+        }
     }
 
     pub fn app_name(&self) -> &'static str {
@@ -64,7 +76,7 @@ impl Frame {
     }
 
     pub(crate) fn aspect_ratio(&self) -> f32 {
-        self.res_x / self.res_y
+        self.res_y / self.res_x
     }
 }
 
@@ -84,16 +96,17 @@ impl Into<WindowResolution> for Frame {
 #[derive(Component)]
 pub(crate) struct ResolutionText;
 
-#[derive(Resource)]
+#[derive(Resource, Clone, Copy)]
 pub struct FrameManager {
     pub(crate) widescreen: Frame, // 16:9
     pub(crate) vertical: Frame,   // 9:16
     pub(crate) square: Frame,     // 1:1
 }
 
-#[derive(Resource)]
+#[derive(Resource, Clone, Copy)]
 pub struct CubeManager {
-    pub(crate) size: f32,
+    pub size: f32,
+    pub color: Color,
 }
 
 impl FrameManager {
