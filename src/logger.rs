@@ -20,9 +20,4 @@ pub(crate) fn logger_setup() {
             )
         })
         .init();
-    debug!("debug line");
-    info!("Hello world");
-    info!("Hello world");
-    info!("Hello world");
-    info!("Hello world");
 }

@@ -1,13 +1,11 @@
-use bevy::math::cubic_splines::CubicCurve;
-use bevy::math::vec3;
-use bevy::window::{PresentMode, WindowResized};
-use bevy::{prelude::*, window::WindowTheme};
-use std::f32::consts::PI;
-const CUBE_COLOR: Color = Color::rgb(0.98, 0.98, 0.96);
-use crate::app::{Frame, FrameManager, ResolutionText};
+use bevy::window::WindowResized;
+use bevy::{math::cubic_splines::CubicCurve, prelude::*};
 
-// Size of the cube
-const CUBE_SIZE: f32 = 0.25;
+use crate::app::{GeometryManager, Viewport, ViewportManager};
+
+/// Marker component for the text that displays the current resolution.
+#[derive(Component)]
+pub(crate) struct ResolutionText;
 
 // Spawns the UI
 pub(crate) fn setup_ui(mut cmd: Commands) {
@@ -35,140 +33,6 @@ pub(crate) fn setup_ui(mut cmd: Commands) {
     });
 }
 
-/// set up a simple 3D scene
-pub(crate) fn setup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-    mut windows: Query<&mut Window>,
-) {
-    println!("cube_size: {}", CUBE_SIZE);
-
-    // let window = windows.single_mut();
-    // let window_width = window.width();
-    // let window_height = window.height();
-    // println!("window_width: {}", window_width);
-    // println!("window_height: {}", window_height);
-
-    let plane_size_x = 10.0;
-    let plane_size_y = 10.0;
-    println!("plane_size_x: {}", plane_size_x);
-    println!("plane_size_y: {}", plane_size_y);
-
-    let cube_material = materials.add(CUBE_COLOR.into());
-    let cube_mesh = meshes.add(shape::Cube { size: CUBE_SIZE }.into());
-
-    let cube_count_x = (plane_size_x / CUBE_SIZE) as usize;
-    let cube_count_y = (plane_size_y / CUBE_SIZE) as usize;
-    println!("cube_count_x: {}", cube_count_x);
-    println!("cube_count_y: {}", cube_count_y);
-
-    let cube_offset_x = plane_size_x / 2.0 - CUBE_SIZE / 2.0;
-    let cube_offset_y = plane_size_y / 2.0 - CUBE_SIZE / 2.0;
-    println!("cube_offset_x: {}", cube_offset_x);
-    println!("cube_offset_y: {}", cube_offset_y);
-
-    for x in 0..cube_count_x {
-        for y in 0..cube_count_y {
-            if x == 0 && y == 0 || x == cube_count_x - 1 && y == cube_count_y - 1 {
-                println!(
-                    "x: {}, y: {}",
-                    x as f32 * CUBE_SIZE - cube_offset_x,
-                    y as f32 * CUBE_SIZE - cube_offset_y
-                );
-            }
-            commands.spawn(PbrBundle {
-                mesh: cube_mesh.clone(),
-                material: cube_material.clone(),
-                transform: Transform::from_xyz(
-                    x as f32 * CUBE_SIZE - cube_offset_x,
-                    y as f32 * CUBE_SIZE - cube_offset_y,
-                    0.0,
-                ),
-                ..Default::default()
-            });
-        }
-    }
-
-    // draw another layer of cubes on top of the first layer but only on the edges, iterate this 3 times
-    for z in 1..6 {
-        for x in 0..cube_count_x {
-            for y in 0..cube_count_y {
-                if x == 0 || x == cube_count_x - 1 || y == 0 || y == cube_count_y - 1 {
-                    commands.spawn(PbrBundle {
-                        mesh: cube_mesh.clone(),
-                        material: cube_material.clone(),
-                        transform: Transform::from_xyz(
-                            x as f32 * CUBE_SIZE - cube_offset_x,
-                            y as f32 * CUBE_SIZE - cube_offset_y,
-                            z as f32 * CUBE_SIZE,
-                        ),
-                        ..Default::default()
-                    });
-                }
-            }
-        }
-    }
-
-    // let wireframe_cube_size = CUBE_SIZE * cube_count_x as f32 / 2.0;
-    let wireframe_cube_color = Color::rgb(0.0, 0.0, 0.0);
-    let wireframe_cube_material = materials.add(wireframe_cube_color.into());
-    let wireframe_cube_mesh = meshes.add(
-        shape::Capsule {
-            radius: CUBE_SIZE / 8.0,
-            depth: CUBE_SIZE / 8.0,
-            ..Default::default()
-        }
-        .into(),
-    );
-
-    // commands.spawn(PbrBundle {
-    //     mesh: wireframe_cube_mesh.clone(),
-    //     material: wireframe_cube_material.clone(),
-    //     transform: Transform::from_xyz(0.0, 0.0, 0.0),
-    //     ..Default::default()
-    // });
-
-    let points = [[
-        vec3(-3., 2., 3.),
-        vec3(3., 8., 3.),
-        vec3(-3., 8., 1.5),
-        vec3(2., 2., 1.2),
-    ]];
-
-    for z in 1..5 {
-        for x in 1..cube_count_x {
-            for y in 1..cube_count_y as usize {
-                let pos_x = x as f32 * (plane_size_x - CUBE_SIZE) / (cube_count_x - 1) as f32
-                    - plane_size_x / 2.0
-                    + CUBE_SIZE / 2.0;
-                let pos_y = y as f32 * (plane_size_y - CUBE_SIZE) / (cube_count_y - 1) as f32
-                    - plane_size_y / 2.0
-                    + CUBE_SIZE / 2.0;
-                println!("pos_x: {}, pos_y: {}, z: {}", pos_x, pos_y, z);
-
-                // if random less than 0.5 continue
-                if rand::random::<f32>() < 0.5 {
-                    continue;
-                }
-
-                // Make a CubicCurve
-                // let bezier = Bezier::new(points).to_curve();
-
-                commands.spawn((
-                    PbrBundle {
-                        mesh: wireframe_cube_mesh.clone(),
-                        material: wireframe_cube_material.clone(),
-                        transform: Transform::from_xyz(pos_x, pos_y, z as f32 * CUBE_SIZE),
-                        ..Default::default()
-                    },
-                    // Curve(bezier),
-                ));
-            }
-        }
-    }
-}
-
 pub(crate) fn setup_light(mut commands: Commands) {
     // light
     commands.spawn(PointLightBundle {
@@ -182,31 +46,35 @@ pub(crate) fn setup_light(mut commands: Commands) {
     });
 }
 
-pub(crate) fn setup_camera(mut commands: Commands, mut windows: Query<&mut Window>) {
-    // Calculate distance A from camera to plane based on distance B and plane size
-    let window = windows.single_mut();
+pub(crate) fn setup_camera(
+    mut commands: Commands,
+    cube_manager: Res<GeometryManager>,
+    viewport_manager: Res<ViewportManager>,
+) {
+    /* This system shows how to calculate the camera position based on the frame size and the fov */
+    let plane_size = cube_manager.frame.plane_size;
+    let frame_thickeness = cube_manager.frame.thickness;
+    let frame_start_position = cube_manager.frame.start_position;
+    let cube_size = cube_manager.frame.cube_size;
 
-    let plane_size_x = 10.0;
+    let aspect_ratio = viewport_manager.default().aspect_ratio();
+    let plane_size_x: f32 = viewport_manager.default().aspect_scaling(plane_size)[0];
+
     let fov = 45.0;
-    let c = plane_size_x / 2.0 - CUBE_SIZE * 3.0; // must be 4.25
-    let beta = fov / 2.0; // 45/2 always
-    println!("c: {}", c);
-    println!("beta: {}", beta);
+    let c = plane_size_x / 2.0;
+    let beta: f32 = fov / 2.0;
+    let z = c * (1.0 + 1.0 / beta.tan()) - c + frame_thickeness as f32 * cube_size;
 
-    // let fov = 45.0 * PI / 180.0;
-    let z = c / (beta * (PI / 180.0)).tan();
-    println!("z: {}", z);
-
-    // camera
+    // Camera
     commands.spawn(Camera3dBundle {
         projection: Projection::Perspective(PerspectiveProjection {
             fov,
-            // near: 0.1,
-            // far: 1000.0,
-            aspect_ratio: window.width() / window.height(),
+            near: 0.1,
+            far: 1000.0,
+            aspect_ratio,
             ..Default::default()
         }),
-        transform: Transform::from_xyz(0.0, 0.0, z).looking_at(Vec3::ZERO, Vec3::Y),
+        transform: Transform::from_xyz(0.0, 0.0, z).looking_at(frame_start_position, Vec3::Y),
         ..default()
     });
 }
@@ -215,20 +83,20 @@ pub(crate) fn setup_camera(mut commands: Commands, mut windows: Query<&mut Windo
 pub(crate) fn toggle_resolution(
     keys: Res<Input<KeyCode>>,
     mut windows: Query<&mut Window>,
-    resolution: Res<FrameManager>,
+    resolution: Res<ViewportManager>,
 ) {
     let mut window = windows.single_mut();
 
     if keys.just_pressed(KeyCode::Key1) {
-        let frame: Frame = resolution.widescreen;
+        let frame: Viewport = resolution.widescreen;
         window.resolution.set(frame.res_x, frame.res_y);
     }
     if keys.just_pressed(KeyCode::Key2) {
-        let frame: Frame = resolution.vertical;
+        let frame: Viewport = resolution.vertical;
         window.resolution.set(frame.res_x, frame.res_y);
     }
     if keys.just_pressed(KeyCode::Key3) {
-        let frame: Frame = resolution.square;
+        let frame: Viewport = resolution.square;
         window.resolution.set(frame.res_x, frame.res_y);
     }
 }

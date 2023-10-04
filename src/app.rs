@@ -1,24 +1,36 @@
+// app
+
 use bevy::{
-    pbr::wireframe::WireframePlugin,
-    prelude::{default, Component, PluginGroup, Resource, Startup, Update, Vec2},
+    prelude::{default, Color, Component, PluginGroup, Resource, Startup, Update, Vec2, Vec3},
     window::{PresentMode, Window, WindowPlugin, WindowResolution, WindowTheme},
     DefaultPlugins,
 };
 
-use crate::bevy_runner::{
-    animate_cube, on_resize_system, setup, setup_camera, setup_light, setup_ui, toggle_resolution,
+use crate::{
+    bevy_runner::{
+        animate_cube, on_resize_system, setup_camera, setup_light, setup_ui, toggle_resolution,
+    },
+    geometry, logger,
 };
 
 pub struct App {
     app_name: &'static str,
-    cube_size: f32,
+    frame_manager: ViewportManager,
+    geometry_manager: GeometryManager,
 }
 
 impl App {
-    pub fn new(app_name: &'static str, frame_manager: FrameManager, cube_size: f32) -> Self {
-        let resolution: WindowResolution = (*frame_manager.default()).into();
+    pub fn new(
+        app_name: &'static str,
+        viewport_manager: ViewportManager,
+        geometry_manager: GeometryManager,
+    ) -> Self {
+        let default_frame = *viewport_manager.default();
+        let resolution: WindowResolution = (default_frame).into();
+        logger::logger_setup();
         bevy::prelude::App::new()
-            .insert_resource(frame_manager)
+            .insert_resource(viewport_manager)
+            .insert_resource(geometry_manager)
             .add_plugins((
                 DefaultPlugins.set(WindowPlugin {
                     primary_window: Some(Window {
@@ -39,70 +51,86 @@ impl App {
                 // LogDiagnosticsPlugin::default(),
                 // FrameTimeDiagnosticsPlugin,
             ))
-            .add_systems(Startup, (setup, setup_light, setup_camera, setup_ui))
+            .add_systems(
+                Startup,
+                (geometry::frame::draw, setup_light, setup_camera, setup_ui),
+            )
             .add_systems(Update, (on_resize_system, toggle_resolution))
             .add_systems(Update, animate_cube)
             .run();
         Self {
             app_name,
-            cube_size,
+            frame_manager: viewport_manager,
+            geometry_manager: geometry_manager,
         }
     }
 
     pub fn app_name(&self) -> &'static str {
         self.app_name
     }
-
-    pub fn cube_size(&self) -> f32 {
-        self.cube_size
-    }
 }
 
 #[derive(Copy, Clone)]
-pub struct Frame {
+pub struct Viewport {
     pub(crate) res_x: f32,
     pub(crate) res_y: f32,
 }
 
-impl Frame {
+impl Viewport {
     pub const fn new(res_x: f32, res_y: f32) -> Self {
         Self { res_x, res_y }
     }
 
-    pub(crate) fn aspect_ratio(&self) -> f32 {
-        self.res_x / self.res_y
+    pub fn aspect_ratio(&self) -> f32 {
+        self.res_y / self.res_x
+    }
+
+    pub fn aspect_scaling(&self, size: f32) -> [f32; 2] {
+        return [size * 1.0 / self.aspect_ratio(), size * self.aspect_ratio()];
     }
 }
 
-impl Into<Vec2> for Frame {
+impl Into<Vec2> for Viewport {
     fn into(self) -> Vec2 {
         Vec2::new(self.res_x, self.res_y)
     }
 }
 
-impl Into<WindowResolution> for Frame {
+impl Into<WindowResolution> for Viewport {
     fn into(self) -> WindowResolution {
         WindowResolution::new(self.res_x, self.res_y)
     }
 }
 
-/// Marker component for the text that displays the current resolution.
-#[derive(Component)]
-pub(crate) struct ResolutionText;
-
-#[derive(Resource)]
-pub struct FrameManager {
-    pub(crate) widescreen: Frame, // 16:9
-    pub(crate) vertical: Frame,   // 9:16
-    pub(crate) square: Frame,     // 1:1
+#[derive(Resource, Clone, Copy)]
+pub struct ViewportManager {
+    pub(crate) widescreen: Viewport, // 16:9
+    pub(crate) vertical: Viewport,   // 9:16
+    pub(crate) square: Viewport,     // 1:1
 }
 
-impl FrameManager {
+impl ViewportManager {
     /**
      * Returns the default frame, which is the square frame.
      * This is used when the user has not selected a resolution.
      */
-    pub(crate) fn default(&self) -> &Frame {
+    pub(crate) fn default(&self) -> &Viewport {
         &self.square
     }
 }
+
+#[derive(Copy, Clone)]
+pub struct Frame {
+    pub(crate) plane_size: f32,
+    pub(crate) thickness: usize,
+    pub(crate) cube_size: f32,
+    pub(crate) cube_color: Color,
+    pub(crate) start_position: Vec3,
+}
+
+#[derive(Resource, Copy, Clone)]
+pub struct GeometryManager {
+    pub(crate) frame: Frame,
+}
+
+impl GeometryManager {}
