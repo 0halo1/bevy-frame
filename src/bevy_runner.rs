@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::window::WindowResized;
 use std::f32::consts::PI;
 
-use crate::app::{Frame, GeometryManager, ViewportManager};
+use crate::app::{GeometryManager, Viewport, ViewportManager};
 
 /// Marker component for the text that displays the current resolution.
 #[derive(Component)]
@@ -89,15 +89,15 @@ pub(crate) fn toggle_resolution(
     let mut window = windows.single_mut();
 
     if keys.just_pressed(KeyCode::Key1) {
-        let frame: Frame = resolution.widescreen;
+        let frame: Viewport = resolution.widescreen;
         window.resolution.set(frame.res_x, frame.res_y);
     }
     if keys.just_pressed(KeyCode::Key2) {
-        let frame: Frame = resolution.vertical;
+        let frame: Viewport = resolution.vertical;
         window.resolution.set(frame.res_x, frame.res_y);
     }
     if keys.just_pressed(KeyCode::Key3) {
-        let frame: Frame = resolution.square;
+        let frame: Viewport = resolution.square;
         window.resolution.set(frame.res_x, frame.res_y);
     }
 }

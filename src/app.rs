@@ -20,14 +20,14 @@ pub struct App {
 impl App {
     pub fn new(
         app_name: &'static str,
-        frame_manager: ViewportManager,
+        viewport_manager: ViewportManager,
         geometry_manager: GeometryManager,
     ) -> Self {
-        let default_frame = *frame_manager.default();
+        let default_frame = *viewport_manager.default();
         let resolution: WindowResolution = (default_frame).into();
         logger::logger_setup();
         bevy::prelude::App::new()
-            .insert_resource(frame_manager)
+            .insert_resource(viewport_manager)
             .insert_resource(geometry_manager)
             .add_plugins((
                 DefaultPlugins.set(WindowPlugin {
@@ -56,7 +56,7 @@ impl App {
             .run();
         Self {
             app_name,
-            frame_manager,
+            frame_manager: viewport_manager,
             geometry_manager,
         }
     }
@@ -67,12 +67,12 @@ impl App {
 }
 
 #[derive(Copy, Clone)]
-pub struct Frame {
+pub struct Viewport {
     pub(crate) res_x: f32,
     pub(crate) res_y: f32,
 }
 
-impl Frame {
+impl Viewport {
     pub const fn new(res_x: f32, res_y: f32) -> Self {
         Self { res_x, res_y }
     }
@@ -81,21 +81,18 @@ impl Frame {
         self.res_y / self.res_x
     }
 
-    pub fn aspect_scaling(&self, frame_size: f32) -> [f32; 2] {
-        return [
-            frame_size * 1.0 / self.aspect_ratio(),
-            frame_size * self.aspect_ratio(),
-        ];
+    pub fn aspect_scaling(&self, size: f32) -> [f32; 2] {
+        return [size * 1.0 / self.aspect_ratio(), size * self.aspect_ratio()];
     }
 }
 
-impl Into<Vec2> for Frame {
+impl Into<Vec2> for Viewport {
     fn into(self) -> Vec2 {
         Vec2::new(self.res_x, self.res_y)
     }
 }
 
-impl Into<WindowResolution> for Frame {
+impl Into<WindowResolution> for Viewport {
     fn into(self) -> WindowResolution {
         WindowResolution::new(self.res_x, self.res_y)
     }
@@ -103,9 +100,9 @@ impl Into<WindowResolution> for Frame {
 
 #[derive(Resource, Clone, Copy)]
 pub struct ViewportManager {
-    pub(crate) widescreen: Frame, // 16:9
-    pub(crate) vertical: Frame,   // 9:16
-    pub(crate) square: Frame,     // 1:1
+    pub(crate) widescreen: Viewport, // 16:9
+    pub(crate) vertical: Viewport,   // 9:16
+    pub(crate) square: Viewport,     // 1:1
 }
 
 impl ViewportManager {
@@ -113,7 +110,7 @@ impl ViewportManager {
      * Returns the default frame, which is the square frame.
      * This is used when the user has not selected a resolution.
      */
-    pub(crate) fn default(&self) -> &Frame {
+    pub(crate) fn default(&self) -> &Viewport {
         &self.square
     }
 }

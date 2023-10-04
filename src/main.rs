@@ -1,4 +1,4 @@
-use app::{App, Frame, ViewportManager};
+use app::{App, Viewport, ViewportManager};
 use bevy::prelude::{Color, Vec2, Vec3};
 
 use crate::app::GeometryManager;
@@ -13,9 +13,9 @@ fn main() {
     let app: App = app::App::new(
         "3d-render-app",
         ViewportManager {
-            widescreen: Frame::new(1920.0, 1080.0),
-            vertical: Frame::new(1080.0, 1920.0),
-            square: Frame::new(800.0, 800.0),
+            widescreen: Viewport::new(1920.0, 1080.0),
+            vertical: Viewport::new(1080.0, 1920.0),
+            square: Viewport::new(800.0, 800.0),
         },
         GeometryManager {
             frame_thickness: 6,
