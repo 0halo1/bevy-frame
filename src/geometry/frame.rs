@@ -14,14 +14,18 @@ pub fn draw(
     viewport_manager: Res<ViewportManager>,
 ) {
     /* Initialize the scene */
-    let cube_size = cube_manager.frame_cube_size;
-    let cube_color = cube_manager.frame_cube_color;
-    let frame_size = cube_manager.frame_size;
-    let frame_thickness: usize = cube_manager.frame_thickness;
-    let frame_start_position = cube_manager.frame_start_position;
+    let cube_size = cube_manager.frame.cube_size;
+    let cube_color = cube_manager.frame.cube_color;
+    let plane_size = cube_manager.frame.plane_size;
+    let frame_thickness: usize = cube_manager.frame.thickness;
+    let frame_start_position = cube_manager.frame.start_position;
+    println!("frame_start_position: {:?}", frame_start_position);
+    println!("frame_thickness: {}", frame_thickness);
+    println!("frame_size: {}", plane_size);
+    println!("cube_size: {}", cube_size);
 
     /* Scale frame_size by width and height for x and y */
-    let [frame_size_x, frame_size_y] = viewport_manager.default().aspect_scaling(frame_size);
+    let [plane_size_x, plane_size_y] = viewport_manager.default().aspect_scaling(plane_size);
 
     /* Initialize the material & mesh */
     let cube_material = materials.add(cube_color.into());
@@ -29,12 +33,12 @@ pub fn draw(
 
     /* Intialize the structure */
     let [cube_count_x, cube_count_y] = [
-        (frame_size_x / cube_size) as usize,
-        (frame_size_y / cube_size) as usize,
+        (plane_size_x / cube_size) as usize,
+        (plane_size_y / cube_size) as usize,
     ];
     let [cube_offset_x, cube_offset_y] = [
-        frame_size_x / 2.0 - cube_size / 2.0 + frame_start_position.x,
-        frame_size_y / 2.0 - cube_size / 2.0 + frame_start_position.y,
+        plane_size_x / 2.0 - cube_size / 2.0 + frame_start_position.x,
+        plane_size_y / 2.0 - cube_size / 2.0 + frame_start_position.y,
     ];
 
     println!("cube_offset_x: {}", cube_offset_x);

@@ -1,7 +1,7 @@
 use app::{App, Viewport, ViewportManager};
 use bevy::prelude::{Color, Vec2, Vec3};
 
-use crate::app::GeometryManager;
+use crate::app::{Frame, GeometryManager};
 
 mod app;
 mod bevy_runner;
@@ -18,11 +18,13 @@ fn main() {
             square: Viewport::new(800.0, 800.0),
         },
         GeometryManager {
-            frame_thickness: 6,
-            frame_cube_size: 0.1,
-            frame_size: 10.0,
-            frame_cube_color: Color::rgb(0.98, 0.98, 0.96),
-            frame_start_position: Vec3::new(0.0, 0.0, 0.0),
+            frame: Frame {
+                plane_size: 10.0,
+                thickness: 6,
+                cube_size: 0.1,
+                cube_color: Color::rgb(0.98, 0.98, 0.96),
+                start_position: Vec3::new(0.0, 0.0, 0.0),
+            },
         },
     );
 

@@ -57,7 +57,7 @@ impl App {
         Self {
             app_name,
             frame_manager: viewport_manager,
-            geometry_manager,
+            geometry_manager: geometry_manager,
         }
     }
 
@@ -115,20 +115,18 @@ impl ViewportManager {
     }
 }
 
-#[derive(Resource, Clone, Copy)]
-pub struct GeometryManager {
-    /// The size of the frame in world units
-    pub frame_size: f32,
-
-    /// The number of iterations for the frame. Note: scaled by cube_size.
-    pub frame_thickness: usize,
-
-    /// The size of the cubes in world units
-    pub frame_cube_size: f32,
-
-    /// The color of the cubes
-    pub frame_cube_color: Color,
-
-    /// The start position of the frame in world units
-    pub frame_start_position: Vec3,
+#[derive(Copy, Clone)]
+pub struct Frame {
+    pub(crate) plane_size: f32,
+    pub(crate) thickness: usize,
+    pub(crate) cube_size: f32,
+    pub(crate) cube_color: Color,
+    pub(crate) start_position: Vec3,
 }
+
+#[derive(Resource, Copy, Clone)]
+pub struct GeometryManager {
+    pub(crate) frame: Frame,
+}
+
+impl GeometryManager {}

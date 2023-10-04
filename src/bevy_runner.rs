@@ -53,16 +53,16 @@ pub(crate) fn setup_camera(
     viewport_manager: Res<ViewportManager>,
 ) {
     /* This system shows how to calculate the camera position based on the frame size and the fov */
-    let frame_size = cube_manager.frame_size;
-    let frame_thickeness = cube_manager.frame_thickness;
-    let frame_start_position = cube_manager.frame_start_position;
-    let cube_size = cube_manager.frame_cube_size;
+    let plane_size = cube_manager.frame.plane_size;
+    let frame_thickeness = cube_manager.frame.thickness;
+    let frame_start_position = cube_manager.frame.start_position;
+    let cube_size = cube_manager.frame.cube_size;
 
     let aspect_ratio = viewport_manager.default().aspect_ratio();
-    let frame_size_x: f32 = viewport_manager.default().aspect_scaling(frame_size)[0];
+    let plane_size_x: f32 = viewport_manager.default().aspect_scaling(plane_size)[0];
 
     let fov = 45.0;
-    let c = frame_size_x / 2.0;
+    let c = plane_size_x / 2.0;
     let beta: f32 = fov / 2.0;
     let z = c * (1.0 + 1.0 / beta.tan()) - c + frame_thickeness as f32 * cube_size;
 
