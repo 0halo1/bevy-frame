@@ -1,7 +1,7 @@
 // geometry/frame.rs
 
 use bevy::prelude::{
-    shape, Assets, Color, Commands, Component, Mesh, PbrBundle, Query, Res, ResMut,
+    shape, warn, Assets, Color, Commands, Component, Mesh, PbrBundle, Query, Res, ResMut,
     StandardMaterial, Transform, Vec3,
 };
 
@@ -32,10 +32,10 @@ pub fn draw(
     let plane_size = frame.plane_size;
     let frame_thickness: usize = frame.thickness;
     let frame_start_position = frame.start_position;
-    println!("frame_start_position: {:?}", frame_start_position);
-    println!("frame_thickness: {}", frame_thickness);
-    println!("frame_size: {}", plane_size);
-    println!("cube_size: {}", cube_size);
+    warn!("frame_start_position: {:?}", frame_start_position);
+    warn!("frame_thickness: {}", frame_thickness);
+    warn!("frame_size: {}", plane_size);
+    warn!("cube_size: {}", cube_size);
 
     /* Scale frame_size by width and height for x and y */
     let [plane_size_x, plane_size_y] = viewport_manager.default().aspect_scaling(plane_size);
@@ -54,8 +54,8 @@ pub fn draw(
         plane_size_y / 2.0 - cube_size / 2.0 + frame_start_position.y,
     ];
 
-    println!("cube_offset_x: {}", cube_offset_x);
-    println!("cube_offset_y: {}", cube_offset_y);
+    warn!("cube_offset_x: {}", cube_offset_x);
+    warn!("cube_offset_y: {}", cube_offset_y);
 
     /* Draw the first layer of cubes, iterate through the x and y axis and spawn a cube at each position*/
     for x in 0..cube_count_x {
@@ -130,7 +130,7 @@ pub fn draw_particles() {
     //             let pos_y = y as f32 * (plane_size_y - CUBE_SIZE) / (cube_count_y - 1) as f32
     //                 - plane_size_y / 2.0
     //                 + CUBE_SIZE / 2.0;
-    //             println!("pos_x: {}, pos_y: {}, z: {}", pos_x, pos_y, z);
+    //             warn!("pos_x: {}, pos_y: {}, z: {}", pos_x, pos_y, z);
 
     //             // if random less than 0.5 continue
     //             if rand::random::<f32>() < 0.5 {
