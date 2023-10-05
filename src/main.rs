@@ -1,17 +1,17 @@
 use std::ops::Range;
 
 use crate::{
-    core::viewport::{Viewport, ViewportManager},
-    geometry::particle::{Acceleration, BodyBundle, LastPos, Mass},
+    core::viewport::{ Viewport, ViewportManager },
+    geometry::particle::{ Acceleration, BodyBundle, LastPos, Mass },
 };
 
 use bevy::{
     prelude::*,
-    window::{PresentMode, Window, WindowPlugin, WindowTheme},
+    window::{ PresentMode, Window, WindowPlugin, WindowTheme },
     DefaultPlugins,
 };
 mod bevy_runner;
-use rand::{rngs::StdRng, thread_rng, Rng, SeedableRng};
+use rand::{ rngs::StdRng, thread_rng, Rng, SeedableRng };
 
 mod core;
 mod geometry;
@@ -22,7 +22,8 @@ const DELTA_TIME: f32 = 0.01;
 
 fn main() {
     logger::logger_setup();
-    bevy::prelude::App::new()
+    bevy::prelude::App
+        ::new()
         .insert_resource(ViewportManager {
             widescreen: Viewport::new(1920.0, 1080.0),
             vertical: Viewport::new(1080.0, 1920.0),
@@ -69,12 +70,12 @@ fn startup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    viewport_manager: Res<ViewportManager>,
+    viewport_manager: Res<ViewportManager>
 ) {
-    warn!("startup");
+    info!("startup");
 
     /* This system creates the primary frame */
-    warn!("creating-main-frame");
+    info!("creating-main-frame");
     let plane_size = 10.0;
     let frame_thickness = 6;
     let frame_start_position = Vec3::new(0.0, 0.0, 0.0);
@@ -89,14 +90,15 @@ fn startup(
     });
 
     /* This system shows how to calculate the camera position based on the frame size and the fov */
-    warn!("creating-frame-camera");
+    info!("creating-frame-camera");
     let aspect_ratio = viewport_manager.default().aspect_ratio();
-    let [plane_size_x, plane_size_y]: [f32; 2] =
-        viewport_manager.default().aspect_scaling(plane_size);
+    let [plane_size_x, plane_size_y]: [f32; 2] = viewport_manager
+        .default()
+        .aspect_scaling(plane_size);
     let fov = 45.0;
     let c = plane_size_x / 2.0;
     let beta: f32 = fov / 2.0;
-    let z = c * (1.0 + 1.0 / beta.tan()) - c + frame_thickness as f32 * cube_size;
+    let z = c * (1.0 + 1.0 / beta.tan()) - c + (frame_thickness as f32) * cube_size;
     commands.spawn(Camera3dBundle {
         projection: Projection::Perspective(PerspectiveProjection {
             fov,
@@ -110,7 +112,7 @@ fn startup(
     });
 
     /* This system shows how to calculate the light position based on the frame size */
-    warn!("creating-frame-light");
+    info!("creating-frame-light");
     commands.spawn(PointLightBundle {
         point_light: PointLight {
             intensity: 1500.0,
@@ -122,35 +124,34 @@ fn startup(
     });
 
     /* This system creates the particles in the frame */
-    warn!("creating-particles");
+    info!("creating-particles");
     let particle_count = 128;
     let mesh = meshes.add(
         Mesh::try_from(shape::Icosphere {
             radius: 1.0,
             subdivisions: 3,
-        })
-        .unwrap(),
+        }).unwrap()
     );
     let mut rng = thread_rng();
     let color_range = 0.5..1.0;
     let vel_range: [Range<f32>; 3] = [
         0.0..plane_size_x,
         0.0..plane_size_y,
-        0.0..(cube_size * frame_thickness as f32),
+        0.0..cube_size * (frame_thickness as f32),
     ];
 
     for _ in 0..particle_count {
         let radius: f32 = rng.gen_range(0.1..0.7);
-        let mass_value = radius.powi(3) * 10.;
+        let mass_value = radius.powi(3) * 10.0;
 
-        let position = Vec3::new(
-            rng.gen_range(-1.0..1.0),
-            rng.gen_range(-1.0..1.0),
-            rng.gen_range(-1.0..1.0),
-        )
-        .normalize()
-            * rng.gen_range(0.2f32..1.0).cbrt()
-            * 15.;
+        let position =
+            Vec3::new(
+                rng.gen_range(-1.0..1.0),
+                rng.gen_range(-1.0..1.0),
+                rng.gen_range(-1.0..1.0)
+            ).normalize() *
+            rng.gen_range(0.2f32..1.0).cbrt() *
+            15.0;
 
         commands.spawn(BodyBundle {
             pbr: PbrBundle {
@@ -164,32 +165,37 @@ fn startup(
                     Color::rgb(
                         rng.gen_range(color_range.clone()),
                         rng.gen_range(color_range.clone()),
-                        rng.gen_range(color_range.clone()),
-                    )
-                    .into(),
+                        rng.gen_range(color_range.clone())
+                    ).into()
                 ),
                 ..default()
             },
             mass: Mass(mass_value),
             acceleration: Acceleration(Vec3::ZERO),
             last_pos: LastPos(
-                position
-                    - Vec3::new(
+                position -
+                    Vec3::new(
                         rng.gen_range(vel_range[0].clone()),
                         rng.gen_range(vel_range[1].clone()),
-                        rng.gen_range(vel_range[2].clone()),
-                    ) * DELTA_TIME,
+                        rng.gen_range(vel_range[2].clone())
+                    ) *
+                        DELTA_TIME
             ),
         });
     }
 
-    warn!("end-startup");
+    info!("end-startup");
 }
 
 fn interact_bodies(mut query: Query<(&Mass, &GlobalTransform, &mut Acceleration)>) {
     let mut iter = query.iter_combinations_mut();
-    while let Some([(Mass(m1), transform1, mut acc1), (Mass(m2), transform2, mut acc2)]) =
-        iter.fetch_next()
+    while
+        let Some(
+            [
+                (Mass(m1), transform1, mut acc1),
+                (Mass(m2), transform2, mut acc2),
+            ],
+        ) = iter.fetch_next()
     {
         let delta = transform2.translation() - transform1.translation();
         let distance_sq: f32 = delta.length_squared();
