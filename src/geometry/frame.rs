@@ -1,24 +1,37 @@
 // geometry/frame.rs
 
 use bevy::prelude::{
-    shape, Assets, Commands, Mesh, PbrBundle, Res, ResMut, StandardMaterial, Transform,
+    shape, Assets, Color, Commands, Component, Mesh, PbrBundle, Query, Res, ResMut,
+    StandardMaterial, Transform, Vec3,
 };
 
-use crate::app::{GeometryManager, ViewportManager};
+use crate::core::viewport::ViewportManager;
+
+#[derive(Component)]
+pub struct Frame {
+    pub plane_size: f32,
+    pub thickness: usize,
+    pub cube_size: f32,
+    pub cube_color: Color,
+    pub start_position: Vec3,
+}
 
 pub fn draw(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    cube_manager: Res<GeometryManager>,
     viewport_manager: Res<ViewportManager>,
+    mut query: Query<&Frame>,
 ) {
+    /* Query the Frame */
+    let frame = query.single_mut();
+
     /* Initialize the scene */
-    let cube_size = cube_manager.frame.cube_size;
-    let cube_color = cube_manager.frame.cube_color;
-    let plane_size = cube_manager.frame.plane_size;
-    let frame_thickness: usize = cube_manager.frame.thickness;
-    let frame_start_position = cube_manager.frame.start_position;
+    let cube_size = frame.cube_size;
+    let cube_color = frame.cube_color;
+    let plane_size = frame.plane_size;
+    let frame_thickness: usize = frame.thickness;
+    let frame_start_position = frame.start_position;
     println!("frame_start_position: {:?}", frame_start_position);
     println!("frame_thickness: {}", frame_thickness);
     println!("frame_size: {}", plane_size);

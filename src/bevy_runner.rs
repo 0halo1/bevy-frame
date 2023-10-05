@@ -1,7 +1,8 @@
 use bevy::window::WindowResized;
 use bevy::{math::cubic_splines::CubicCurve, prelude::*};
 
-use crate::app::{GeometryManager, Viewport, ViewportManager};
+use crate::core::viewport::{Viewport, ViewportManager};
+use crate::geometry::frame::Frame;
 
 /// Marker component for the text that displays the current resolution.
 #[derive(Component)]
@@ -30,52 +31,6 @@ pub(crate) fn setup_ui(mut cmd: Commands) {
             ),
             ResolutionText,
         ));
-    });
-}
-
-pub(crate) fn setup_light(mut commands: Commands) {
-    // light
-    commands.spawn(PointLightBundle {
-        point_light: PointLight {
-            intensity: 1500.0,
-            shadows_enabled: true,
-            ..default()
-        },
-        transform: Transform::from_xyz(0.0, 6.0, 4.0),
-        ..default()
-    });
-}
-
-pub(crate) fn setup_camera(
-    mut commands: Commands,
-    cube_manager: Res<GeometryManager>,
-    viewport_manager: Res<ViewportManager>,
-) {
-    /* This system shows how to calculate the camera position based on the frame size and the fov */
-    let plane_size = cube_manager.frame.plane_size;
-    let frame_thickeness = cube_manager.frame.thickness;
-    let frame_start_position = cube_manager.frame.start_position;
-    let cube_size = cube_manager.frame.cube_size;
-
-    let aspect_ratio = viewport_manager.default().aspect_ratio();
-    let plane_size_x: f32 = viewport_manager.default().aspect_scaling(plane_size)[0];
-
-    let fov = 45.0;
-    let c = plane_size_x / 2.0;
-    let beta: f32 = fov / 2.0;
-    let z = c * (1.0 + 1.0 / beta.tan()) - c + frame_thickeness as f32 * cube_size;
-
-    // Camera
-    commands.spawn(Camera3dBundle {
-        projection: Projection::Perspective(PerspectiveProjection {
-            fov,
-            near: 0.1,
-            far: 1000.0,
-            aspect_ratio,
-            ..Default::default()
-        }),
-        transform: Transform::from_xyz(0.0, 0.0, z).looking_at(frame_start_position, Vec3::Y),
-        ..default()
     });
 }
 
